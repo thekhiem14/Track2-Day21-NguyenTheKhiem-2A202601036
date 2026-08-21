@@ -63,7 +63,7 @@ cảnh báo của ngưỡng chất lượng.
 |---|---|---|
 | Gõ `$env:VAR = "..."` bị báo lỗi cú pháp | Đang gõ lệnh PowerShell trong cửa sổ Command Prompt (cmd.exe), hai shell không tương thích cú pháp biến môi trường | Chuyển hẳn sang PowerShell, kích hoạt lại venv bằng `Activate.ps1` |
 | `train.py` báo lỗi `Invalid parameter name: 'ï»¿n_estimators'` | `Set-Content -Encoding utf8` trên Windows PowerShell 5.1 tự thêm BOM vào đầu `params.yaml`, làm hỏng tên tham số đầu tiên khi PyYAML đọc file | Đổi sang `-Encoding ascii` khi ghi `params.yaml` bằng PowerShell |
-| Có 2 tiến trình `mlflow ui` chạy song song, ban đầu tưởng là nguyên nhân gây lỗi | Chạy `mlflow ui` nhiều lần ở các cửa sổ terminal khác nhau mà không tắt tiến trình cũ | Dùng `Get-CimInstance`/`netstat` để tìm PID rồi `Stop-Process` các tiến trình dư thừa |
+| Không tạo được `sa-key.json` cho service account như README yêu cầu ở Bước 2 | GCP Organization của VinUni khóa `constraints/iam.disableServiceAccountKeyCreation` ở cấp tổ chức, không có quyền project-owner nào gỡ được | Chuyển sang xác thực không cần key: Application Default Credentials cho máy cá nhân, Workload Identity Federation cho GitHub Actions, service account gắn thẳng vào VM lúc tạo |
 
 ---
 

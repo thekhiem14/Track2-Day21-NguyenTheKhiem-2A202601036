@@ -43,6 +43,9 @@ jobs:
     name: Train
     needs: unit-test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write   # bat buoc de xin duoc OIDC token cho Workload Identity Federation
     outputs:
       f1: ${{ steps.read_report.outputs.f1 }}
 
@@ -57,19 +60,20 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Authenticate to Cloud Storage
-        # GCP: ghi noi dung service account JSON ra file tam va tro
-        # GOOGLE_APPLICATION_CREDENTIALS toi file do (Application Default Credentials).
-        run: |
-          echo '${{ secrets.STORAGE_CREDENTIALS }}' > /tmp/sa-key.json
-          echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa-key.json" >> $GITHUB_ENV
+        # Khong dung sa-key.json (bi chan boi Org Policy cua VinUni:
+        # constraints/iam.disableServiceAccountKeyCreation). Thay bang Workload
+        # Identity Federation - GitHub Actions tu chung minh danh tinh qua OIDC
+        # token ngan han, khong co secret dai han nao ca. Action nay tu dong set
+        # GOOGLE_APPLICATION_CREDENTIALS cho cac step sau trong cung job.
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/87343857210/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: income-lab-sa@track2-day16-01036-505510.iam.gserviceaccount.com
 
       - name: Pull data with DVC
-        # Ghi de credentialpath cuc bo (khong sua file .dvc/config da commit) de
-        # tro thang toi file key vua tao o buoc tren, tranh phu thuoc vao duong dan
-        # tuong doi da luu trong .dvc/config.
-        run: |
-          dvc remote modify --local labstore credentialpath /tmp/sa-key.json
-          dvc pull data/train_batch1.csv.dvc data/holdout.csv.dvc
+        # Khong can dvc remote modify credentialpath - DVC tu doc ADC ma
+        # buoc Authenticate o tren vua thiet lap.
+        run: dvc pull data/train_batch1.csv.dvc data/holdout.csv.dvc
 
       - name: Train model
         run: python src/train.py
