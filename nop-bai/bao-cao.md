@@ -23,60 +23,53 @@ HƯỚNG DẪN - đọc rồi XÓA TOÀN BỘ các khối chú thích này sau k
 
 ## 1. Bộ Siêu Tham Số Đã Chọn và Lý Do
 
-<!-- Khoảng 120 - 150 từ. Điền kết quả thật từ MLflow UI ở Bước 1, tối thiểu 3 lần chạy. -->
-
 | Lần chạy | n_estimators | learning_rate | max_depth | f1_score | accuracy |
 |---|---|---|---|---|---|
-| 1 | ___ | ___ | ___ | ___ | ___ |
-| 2 | ___ | ___ | ___ | ___ | ___ |
-| 3 | ___ | ___ | ___ | ___ | ___ |
+| 1 | 100 | 0.1 | 3 | 0.7109 | 0.878 |
+| 2 | 150 | 0.2 | 4 | 0.6912 | 0.866 |
+| 3 | 50 | 0.05 | 2 | 0.6051 | 0.846 |
+| 4 | 200 | 0.1 | 5 | 0.7149 | 0.874 |
 
-**Bộ siêu tham số đã chọn:** `n_estimators=___`, `learning_rate=___`, `max_depth=___`.
+**Bộ siêu tham số đã chọn:** `n_estimators=200`, `learning_rate=0.1`, `max_depth=5`.
 
-**Lý do:** ___
-
-<!--
-Trả lời trong phần Lý do:
-  - Vì sao bộ này tốt hơn các bộ còn lại (dựa trên f1_score, không phải accuracy)?
-  - Lần chạy có accuracy cao nhất có trùng với lần có f1_score cao nhất không?
-    Nếu không, điều đó nói lên điều gì?
-  - Bạn quan sát thấy đánh đổi nào giữa n_estimators và learning_rate?
--->
+**Lý do:** Bộ này đạt f1_score cao nhất (0,7149) trong bốn lần chạy, dù accuracy (0,874) không phải
+cao nhất. Lần chạy có accuracy cao nhất (100/0.1/3, accuracy=0,878) chỉ đạt f1_score=0,7109, thấp
+hơn bộ được chọn — chứng minh accuracy không phải chỉ số đáng tin cậy để so sánh mô hình trên dữ
+liệu mất cân bằng, vì nó có thể tăng nhờ đoán đúng lớp đa số trong khi bỏ sót lớp thiểu số quan
+trọng hơn. Về đánh đổi giữa hai tham số: bộ learning_rate thấp (0,05) kết hợp n_estimators nhỏ (50)
+cho f1 thấp nhất (0,6051, dưới ngưỡng 0,65) vì mô hình chưa học đủ; tăng n_estimators lên 200 để bù
+cho learning_rate vừa phải (0,1) giúp f1 cải thiện rõ rệt, đúng với quan hệ đánh đổi được mô tả
+trong tasks/buoc-1.md.
 
 ---
 
 ## 2. Vì Sao Ngưỡng Chất Lượng Đặt Trên F1 Chứ Không Phải Accuracy
 
-<!-- Khoảng 120 - 150 từ. -->
-
-___
-
-<!--
-Cần nêu được:
-  - Phân bố lớp của tập dữ liệu (tỷ lệ lớp thu nhập > 50K) và hệ quả của nó.
-  - Accuracy của một mô hình luôn trả lời "thu nhập thấp" là bao nhiêu, vì sao con số
-    đó gây hiểu nhầm.
-  - F1 của lớp dương đo điều gì mà accuracy không đo được.
-  - Vì sao KHÔNG dùng average="weighted" hay average="macro" khi gọi f1_score.
--->
+Tập dữ liệu Adult có phân bố lớp mất cân bằng: chỉ 24,8% số mẫu thuộc lớp thu nhập cao (>50K). Một
+mô hình vô dụng, luôn trả lời "thu nhập thấp" cho mọi mẫu, vẫn đạt accuracy 0,752 — con số nghe có
+vẻ cao nhưng gây hiểu nhầm nghiêm trọng, vì mô hình đó không học được gì và không bao giờ nhận diện
+đúng một người thu nhập cao nào. F1-score của lớp dương đo đồng thời precision và recall trên đúng
+lớp thiểu số quan trọng (thu nhập cao), nên phản ánh đúng khả năng thực sự của mô hình — điều mà
+accuracy hoàn toàn không đo được trên dữ liệu lệch lớp. Vì vậy lab đặt ngưỡng chất lượng trên
+`f1_score >= 0.65` thay vì accuracy. Khi gọi `f1_score()`, không dùng `average="weighted"` hay
+`average="macro"`, vì hai cách tính này bị lớp đa số kéo giá trị lên cao, làm mất hoàn toàn ý nghĩa
+cảnh báo của ngưỡng chất lượng.
 
 ---
 
 ## 3. Khó Khăn Gặp Phải và Cách Giải Quyết
 
-<!-- Nêu 2 - 3 khó khăn thật, mỗi ô một câu ngắn. -->
-
 | Khó khăn | Nguyên nhân | Cách giải quyết |
 |---|---|---|
-| ___ | ___ | ___ |
-| ___ | ___ | ___ |
-| ___ | ___ | ___ |
+| Gõ `$env:VAR = "..."` bị báo lỗi cú pháp | Đang gõ lệnh PowerShell trong cửa sổ Command Prompt (cmd.exe), hai shell không tương thích cú pháp biến môi trường | Chuyển hẳn sang PowerShell, kích hoạt lại venv bằng `Activate.ps1` |
+| `train.py` báo lỗi `Invalid parameter name: 'ï»¿n_estimators'` | `Set-Content -Encoding utf8` trên Windows PowerShell 5.1 tự thêm BOM vào đầu `params.yaml`, làm hỏng tên tham số đầu tiên khi PyYAML đọc file | Đổi sang `-Encoding ascii` khi ghi `params.yaml` bằng PowerShell |
+| Có 2 tiến trình `mlflow ui` chạy song song, ban đầu tưởng là nguyên nhân gây lỗi | Chạy `mlflow ui` nhiều lần ở các cửa sổ terminal khác nhau mà không tắt tiến trình cũ | Dùng `Get-CimInstance`/`netstat` để tìm PID rồi `Stop-Process` các tiến trình dư thừa |
 
 ---
 
 ## 4. So Sánh Bước 2 và Bước 3 (bắt buộc, 2 - 3 câu)
 
-<!-- Lấy số liệu từ bảng ở mục 3.6 của tasks/buoc-3.md. -->
+<!-- Lấy số liệu từ bảng ở mục 3.6 của tasks/buoc-3.md. Điền sau khi hoàn thành Bước 2 và Bước 3. -->
 
 | | f1_score | accuracy |
 |---|---|---|
