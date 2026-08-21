@@ -13,11 +13,11 @@ HƯỚNG DẪN - đọc rồi XÓA TOÀN BỘ các khối chú thích này sau k
 
 | | |
 |---|---|
-| Họ và tên | ___ |
-| MSSV | ___ |
+| Họ và tên | Nguyễn Thế Khiê, |
+| MSSV | 2A202601036 |
 | Lớp / Khóa | K4 |
-| Repo GitHub | https://github.com/___/___ |
-| Ngày nộp | ___ |
+| Repo GitHub | https://github.com/thekhiem14/Track2-Day21-NguyenTheKhiem-2A202601036 |
+| Ngày nộp | 21/8/2026 |
 
 ---
 
